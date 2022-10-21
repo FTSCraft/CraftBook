@@ -6,26 +6,17 @@ import com.sk89q.craftbook.bukkit.CraftBookPlugin;
 import com.sk89q.craftbook.util.BlockSyntax;
 import com.sk89q.craftbook.util.BlockUtil;
 import com.sk89q.craftbook.util.EventUtil;
-import com.sk89q.craftbook.util.ItemSyntax;
 import com.sk89q.craftbook.util.ItemUtil;
 import com.sk89q.craftbook.util.LocationUtil;
 import com.sk89q.craftbook.util.ProtectionUtil;
 import com.sk89q.util.yaml.YAMLProcessor;
 import com.sk89q.worldedit.blocks.Blocks;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
-import com.sk89q.worldedit.util.HandSide;
 import com.sk89q.worldedit.world.block.BaseBlock;
 import com.sk89q.worldedit.world.block.BlockCategories;
 import com.sk89q.worldedit.world.block.BlockStateHolder;
 import com.sk89q.worldedit.world.block.BlockType;
-import com.sk89q.worldedit.world.item.ItemType;
-import com.sk89q.worldedit.world.item.ItemTypes;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Tag;
-import org.bukkit.TreeSpecies;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
@@ -33,14 +24,12 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.Leaves;
 import org.bukkit.material.MaterialData;
 import org.bukkit.material.Tree;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class TreeLopper extends AbstractCraftBookMechanic {
@@ -54,7 +43,9 @@ public class TreeLopper extends AbstractCraftBookMechanic {
         CraftBookPlayer player = CraftBookPlugin.inst().wrapPlayer(event.getPlayer());
 
         if(!Blocks.containsFuzzy(enabledBlocks, BukkitAdapter.adapt(event.getBlock().getBlockData()))) return;
-        if(!enabledItems.contains(player.getItemInHand(HandSide.MAIN_HAND).getType())) return;
+        if(!checkItem(event.getPlayer().getInventory().getItemInMainHand())) {
+            return;
+        }
         if(!player.hasPermission("craftbook.mech.treelopper.use")) {
             if(CraftBookPlugin.inst().getConfiguration().showPermissionMessages)
                 player.printError("mech.use-permission");
@@ -132,8 +123,9 @@ public class TreeLopper extends AbstractCraftBookMechanic {
             return false;
         if(broken > maxSearchSize)
             return false;
-        if(!enabledItems.contains(player.getItemInHand(HandSide.MAIN_HAND).getType()))
+        if(!checkItem(event.getPlayer().getInventory().getItemInMainHand())) {
             return false;
+        }
         TreeSpecies species = null;
         if(placeSaplings
                 && (block.getRelative(0, -1, 0).getType() == Material.DIRT || block.getRelative(0, -1, 0).getType() == Material.GRASS_BLOCK || block.getRelative(0, -1, 0).getType() == Material.MYCELIUM)) {
@@ -143,7 +135,7 @@ public class TreeLopper extends AbstractCraftBookMechanic {
             else if (data instanceof Tree)
                 species = ((Tree) data).getSpecies();
         }
-        block.breakNaturally(event.getPlayer().getItemInHand());
+        block.breakNaturally(event.getPlayer().getInventory().getItemInMainHand());
         if(species != null && planted < maxSaplings(species)) {
             Bukkit.getScheduler().runTaskLater(CraftBookPlugin.inst(), new SaplingPlanter(block, species), 2);
             planted ++;
@@ -166,7 +158,7 @@ public class TreeLopper extends AbstractCraftBookMechanic {
     }
 
     List<BaseBlock> enabledBlocks;
-    List<ItemType> enabledItems;
+    List<Integer> enabledItems;
     private int maxSearchSize;
     private boolean allowDiagonals;
     private boolean placeSaplings;
@@ -181,9 +173,7 @@ public class TreeLopper extends AbstractCraftBookMechanic {
         enabledBlocks = BlockSyntax.getBlocks(config.getStringList(path + "block-list", BlockCategories.LOGS.getAll().stream().map(BlockType::getId).sorted(String::compareToIgnoreCase).collect(Collectors.toList())), true);
 
         config.setComment(path + "tool-list", "A list of tools that can trigger the TreeLopper mechanic.");
-        enabledItems = config.getStringList(path + "tool-list", Arrays.asList(ItemTypes.IRON_AXE.getId(), ItemTypes.WOODEN_AXE.getId(),
-                ItemTypes.STONE_AXE.getId(), ItemTypes.DIAMOND_AXE.getId(), ItemTypes.GOLDEN_AXE.getId()))
-                .stream().map(ItemSyntax::getItem).map(ItemStack::getType).map(BukkitAdapter::asItemType).collect(Collectors.toList());
+        enabledItems = config.getIntList(path + "tool-list", new ArrayList<>(List.of()));
 
         config.setComment(path + "max-size", "The maximum amount of blocks the TreeLopper can break.");
         maxSearchSize = config.getInt(path + "max-size", 30);
@@ -242,5 +232,16 @@ public class TreeLopper extends AbstractCraftBookMechanic {
             usedBlock.setType(saplingMaterial);
         }
 
+    }
+
+    private boolean checkItem(ItemStack itemStack) {
+        if (itemStack == null) return false;
+        if (!itemStack.hasItemMeta()) return false;
+
+        ItemMeta meta = itemStack.getItemMeta();
+
+
+        if (!meta.hasCustomModelData()) return false;
+        return enabledItems.contains(meta.getCustomModelData());
     }
 }

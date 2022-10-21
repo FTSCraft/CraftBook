@@ -65,8 +65,8 @@ public class TreeLopperTest extends BaseTestCase {
         lopper.enabledBlocks = new ArrayList<>();
         lopper.enabledBlocks.add(BlockTypes.OAK_LOG.getDefaultState().toBaseBlock());
 
-        lopper.enabledItems = new ArrayList<>();
-        lopper.enabledItems.add(ItemTypes.DIAMOND_AXE);
+//        lopper.enabledItems = new ArrayList<>();
+//        lopper.enabledItems.add(ItemTypes.DIAMOND_AXE);
 
         getConfig().showPermissionMessages = true;
 
