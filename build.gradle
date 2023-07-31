@@ -5,7 +5,7 @@ plugins {
 
 println """
 *******************************************
- You are building CraftBook! 
+ You are building CraftBook!
  If you encounter trouble:
  1) Read CONTRIBUTING.md if you haven't yet
  2) Try running 'build' in a separate Gradle run
@@ -105,31 +105,31 @@ allprojects {
         testImplementation group: 'org.powermock', name: 'powermock-module-junit4', version: '1.7.4'
     }
 
-    if (JavaVersion.current().isJava8Compatible()) {
-        // Java 8 turns on doclint which we fail
-        tasks.withType(Javadoc) {
-            options.addStringOption('Xdoclint:none', '-quiet')
-        }
-    }
+    // if (JavaVersion.current().isJava8Compatible()) {
+    //     // Java 8 turns on doclint which we fail
+    //     tasks.withType(Javadoc) {
+    //         options.addStringOption('Xdoclint:none', '-quiet')
+    //     }
+    // }
 
     task sourcesJar(type: Jar, dependsOn: classes) {
         classifier = 'sources'
         from sourceSets.main.allSource
     }
 
-    task javadocJar(type: Jar, dependsOn: javadoc) {
-        classifier = 'javadoc'
-        from javadoc.destinationDir
-    }
+    // task javadocJar(type: Jar, dependsOn: javadoc) {
+    //     classifier = 'javadoc'
+    //     from javadoc.destinationDir
+    // }
 
     artifacts {
         archives shadowJar
         archives sourcesJar
-        archives javadocJar
+        // archives javadocJar
     }
 
     build.dependsOn(sourcesJar)
-    build.dependsOn(javadocJar)
+    // build.dependsOn(javadocJar)
 
     jar {
         manifest {
