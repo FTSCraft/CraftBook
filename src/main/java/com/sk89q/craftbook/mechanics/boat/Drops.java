@@ -4,6 +4,7 @@ import com.sk89q.craftbook.AbstractCraftBookMechanic;
 import com.sk89q.craftbook.util.EventUtil;
 import com.sk89q.craftbook.util.ItemUtil;
 import com.sk89q.util.yaml.YAMLProcessor;
+import org.bukkit.Material;
 import org.bukkit.entity.Boat;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -21,7 +22,11 @@ public class Drops extends AbstractCraftBookMechanic {
 
         if (event.getAttacker() == null) {
             Boat boat = (Boat) event.getVehicle();
-            boat.getLocation().getWorld().dropItemNaturally(boat.getLocation(), new ItemStack(boat.getBoatType().getMaterial()));
+            Material material = Material.valueOf(boat.getType().toString().toUpperCase());
+            if(material == null) {
+                material = boat.getBoatType().getMaterial();
+            }
+            boat.getLocation().getWorld().dropItemNaturally(boat.getLocation(), new ItemStack(material));
             boat.remove();
             event.setCancelled(true);
         }

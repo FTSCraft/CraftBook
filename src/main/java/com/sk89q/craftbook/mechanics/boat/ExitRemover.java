@@ -7,6 +7,7 @@ import com.sk89q.craftbook.util.EventUtil;
 import com.sk89q.craftbook.util.ItemUtil;
 import com.sk89q.util.yaml.YAMLProcessor;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.Boat;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -43,7 +44,12 @@ public class ExitRemover extends AbstractCraftBookMechanic {
             if(!boat.isValid() || boat.isDead() || !boat.isEmpty()) return;
 
             if(giveItem) {
-                ItemStack stack = new ItemStack(ItemUtil.getBoatFromTree(boat.getWoodType()), 1);
+                Material material = Material.valueOf(boat.getType().toString().toUpperCase());
+                if(material == null) {
+                    material = Material.OAK_BOAT;
+                }
+
+                ItemStack stack = new ItemStack(material, 1);
 
                 if(player instanceof Player) {
                     if(!((Player) player).getInventory().addItem(stack).isEmpty())
