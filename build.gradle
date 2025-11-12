@@ -96,7 +96,7 @@ allprojects {
         }
         maven {
             name "papermc"
-            url "https://papermc.io/repo/repository/maven-public/"
+            url "https://repo.papermc.io/repository/maven-public/"
         }
     }
 
@@ -107,7 +107,7 @@ allprojects {
         compileOnly 'com.sk89q.worldguard:worldguard-core:7.0.9'
         compileOnly 'com.sk89q.worldguard:worldguard-bukkit:7.0.9'
         compileOnly 'com.github.MilkBowl:VaultAPI:1.7'
-        compileOnly 'com.comphenix.protocol:ProtocolLib:5.0.0-SNAPSHOT'
+        compileOnly 'com.github.dmulloy2:protocollib:5.0.0'
         compileOnly 'fr.neatmonster:nocheatplus:3.15.1-RC'
 
         implementation 'com.sk89q:squirrelid:0.1.0'
